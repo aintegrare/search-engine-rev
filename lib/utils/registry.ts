@@ -39,6 +39,9 @@ export const registry = createProviderRegistry({
   xai
 })
 
+const ENABLED_PROVIDERS = ['openai', 'anthropic', 'xai']
+const TOOL_SUPPORTED_PROVIDERS = ['openai', 'anthropic'] // Add xai if it supports tool calling
+
 export function getModel(model: string) {
   const [provider, ...modelNameParts] = model.split(':') ?? []
   const modelName = modelNameParts.join(':')
@@ -86,35 +89,8 @@ export function getModel(model: string) {
   return registry.languageModel(model)
 }
 
-export function isProviderEnabled(providerId: string): boolean {
-  switch (providerId) {
-    case 'openai':
-      return !!process.env.OPENAI_API_KEY
-    case 'anthropic':
-      return !!process.env.ANTHROPIC_API_KEY
-    case 'google':
-      return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
-    case 'groq':
-      return !!process.env.GROQ_API_KEY
-    case 'ollama':
-      return !!process.env.OLLAMA_BASE_URL
-    case 'azure':
-      return !!process.env.AZURE_API_KEY && !!process.env.AZURE_RESOURCE_NAME
-    case 'deepseek':
-      return !!process.env.DEEPSEEK_API_KEY
-    case 'fireworks':
-      return !!process.env.FIREWORKS_API_KEY
-    case 'xai':
-      return !!process.env.XAI_API_KEY
-    case 'openai-compatible':
-      return (
-        !!process.env.OPENAI_COMPATIBLE_API_KEY &&
-        !!process.env.OPENAI_COMPATIBLE_API_BASE_URL &&
-        !!process.env.NEXT_PUBLIC_OPENAI_COMPATIBLE_MODEL
-      )
-    default:
-      return false
-  }
+export function isProviderEnabled(provider: string): boolean {
+  return ENABLED_PROVIDERS.includes(provider)
 }
 
 export function getToolCallModel(model?: string) {
@@ -140,21 +116,9 @@ export function getToolCallModel(model?: string) {
   }
 }
 
-export function isToolCallSupported(model?: string) {
-  const [provider, ...modelNameParts] = model?.split(':') ?? []
-  const modelName = modelNameParts.join(':')
-
-  if (provider === 'ollama') {
-    return false
-  }
-
-  if (provider === 'google') {
-    return false
-  }
-
-  // Deepseek R1 is not supported
-  // Deepseek v3's tool call is unstable, so we include it in the list
-  return !modelName?.includes('deepseek')
+export function isToolCallSupported(model: string): boolean {
+  const [provider] = model.split(':')
+  return TOOL_SUPPORTED_PROVIDERS.includes(provider)
 }
 
 export function isReasoningModel(model: string): boolean {
