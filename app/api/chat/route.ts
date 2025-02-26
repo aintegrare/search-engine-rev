@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 
 export const maxDuration = 30
 
-const DEFAULT_MODEL = 'openai:gpt-4o-mini'
+const DEFAULT_MODEL = 'openai:gpt-o3-mini'
 
 export async function POST(req: Request) {
   try {
